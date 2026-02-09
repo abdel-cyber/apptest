@@ -67,39 +67,39 @@ package-docker:
     - main
 
 ############################################
-# STAGE 5: DEPLOY
+# STAGE 5: DEPLOY (Désactivé - nécessite un serveur)
 ############################################
-deploy-staging:
-  stage: deploy
-  image: docker:latest
-  services:
-    - docker:dind
-  script:
-    - echo "Déploiement en staging..."
-    - docker stop apptest-staging || true
-    - docker rm apptest-staging || true
-    - docker run -d --name apptest-staging -p 3000:3000 $APP_NAME:$APP_VERSION
-    - echo "Déployé sur staging!"
-  environment:
-    name: staging
-    url: http://staging.apptest.local:3000
-  only: 
-    - main
+# deploy-staging:
+#   stage: deploy
+#   image: docker:latest
+#   services:
+#     - docker:dind
+#   script:
+#     - echo "Déploiement en staging..."
+#     - docker stop apptest-staging || true
+#     - docker rm apptest-staging || true
+#     - docker run -d --name apptest-staging -p 3000:3000 $APP_NAME:$APP_VERSION
+#     - echo "Déployé sur staging!"
+#   environment:
+#     name: staging
+#     url: http://staging.apptest.local:3000
+#   only: 
+#     - main
 
-deploy-production:
-  stage: deploy
-  image: docker:latest
-  services: 
-    - docker:dind
-  script:
-    - echo "Déploiement en PRODUCTION..."
-    - docker stop apptest-prod || true
-    - docker rm apptest-prod || true
-    - docker run -d --name apptest-prod -p 8080:3000 $APP_NAME:$APP_VERSION
-    - echo "Déployé en PRODUCTION!"
-  environment:
-    name: production
-    url: http://www.apptest.com
-  when: manual
-  only:
-    - main
+# deploy-production:
+#   stage: deploy
+#   image: docker:latest
+#   services: 
+#     - docker:dind
+#   script:
+#     - echo "Déploiement en PRODUCTION..."
+#     - docker stop apptest-prod || true
+#     - docker rm apptest-prod || true
+#     - docker run -d --name apptest-prod -p 8080:3000 $APP_NAME:$APP_VERSION
+#     - echo "Déployé en PRODUCTION!"
+#   environment:
+#     name: production
+#     url: http://www.apptest.com
+#   when: manual
+#   only:
+#     - main
