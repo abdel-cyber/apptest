@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de Tâches</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+        }
+        
+        .add-task {
+            margin-bottom: 20px;
+        }
+        
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        li {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+        }
+        
+        .completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Gestionnaire de Tâches</h1>
+
+    <div class="add-task">
+        <input type="text" id="taskInput" placeholder="Nouvelle tâche...">
+        <button onclick="addTask()">Ajouter</button>
+    </div>
+
+    <ul id="tasksList"></ul>
+
+    <script>
+        window.onload = () => loadTasks();
+
+        // GET - Charger toutes les tâches
+        async function loadTasks() {
+            const response = await fetch('/api/tasks');
+            const tasks = await response.json();
+            const tasksList = document.getElementById('tasksList');
+
+            tasksList.innerHTML = tasks.map(task => `
+                <li class="${task.completed ? 'completed' : ''}">
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                           onchange="toggleTask(${task.id}, ${!task.completed})">
+                    ${task.title}
+                    <button onclick="editTask(${task.id}, '${task.title}')">Modifier</button>
+                    <button onclick="deleteTask(${task.id})">Supprimer</button>
+                </li>
+            `).join('');
+        }
+
+        // POST - Ajouter une tâche
+        async function addTask() {
+            const input = document.getElementById('taskInput');
+            const title = input.value.trim();
+            if (!title) return;
+
+            await fetch('/api/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title,
+                    completed: false
+                })
+            });
+
+            input.value = '';
+            loadTasks();
+        }
+
+        // PUT - Mettre à jour une tâche
+        async function toggleTask(id, completed) {
+            await fetch(`/api/tasks/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    completed
+                })
+            });
+            loadTasks();
+        }
+
+        async function editTask(id, currentTitle) {
+            const newTitle = prompt('Modifier:', currentTitle);
+            if (newTitle && newTitle.trim() !== currentTitle) {
+                await fetch(`/api/tasks/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: newTitle.trim()
+                    })
+                });
+                loadTasks();
+            }
+        }
+
+        // DELETE - Supprimer une tâche
+        async function deleteTask(id) {
+            if (confirm('Supprimer cette tâche ?')) {
+                await fetch(`/api/tasks/${id}`, {
+                    method: 'DELETE'
+                });
+                loadTasks();
+            }
+        }
+
+        document.getElementById('taskInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+    </script>
+</body>
+
+</html>
