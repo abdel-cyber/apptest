@@ -1,7 +1,7 @@
 const request = require('supertest');
-const { app, server } = require('../server');
+const { app, server, tasks } = require('../server');
 
-// 🔒 Fermer le serveur après tous les tests
+// Fermer le serveur après tous les tests
 afterAll((done) => {
     server.close(done);
 });
@@ -19,10 +19,8 @@ describe('API Tests - CRUD Operations', () => {
         });
 
         it('devrait retourner des tâches avec les bonnes propriétés', async() => {
-            // Si aucune tâche existe, créer une tâche pour tester les propriétés
-            if (!global.tasksCreated) {
+            if (tasks.length === 0) {
                 await request(app).post('/api/tasks').send({ title: 'Tâche test', completed: false });
-                global.tasksCreated = true;
             }
             const response = await request(app).get('/api/tasks');
             expect(response.status).toBe(200);
@@ -134,23 +132,19 @@ describe('API Tests - CRUD Operations', () => {
     });
 
     // --------------------
-    // Test d'intégration complet
+    // Integration Test - Full CRUD Cycle
     // --------------------
     describe('Integration Test - Full CRUD Cycle', () => {
         it('devrait effectuer un cycle CRUD complet', async() => {
-            const createResponse = await request(app)
-                .post('/api/tasks')
-                .send({ title: 'Tâche de test intégration', completed: false });
+            const createResponse = await request(app).post('/api/tasks').send({ title: 'Tâche intégration', completed: false });
             expect(createResponse.status).toBe(201);
             const taskId = createResponse.body.id;
 
             const getResponse = await request(app).get(`/api/tasks/${taskId}`);
             expect(getResponse.status).toBe(200);
-            expect(getResponse.body.title).toBe('Tâche de test intégration');
+            expect(getResponse.body.title).toBe('Tâche intégration');
 
-            const updateResponse = await request(app)
-                .put(`/api/tasks/${taskId}`)
-                .send({ title: 'Tâche modifiée', completed: true });
+            const updateResponse = await request(app).put(`/api/tasks/${taskId}`).send({ title: 'Tâche modifiée', completed: true });
             expect(updateResponse.status).toBe(200);
             expect(updateResponse.body.title).toBe('Tâche modifiée');
             expect(updateResponse.body.completed).toBe(true);
@@ -168,7 +162,8 @@ describe('API Tests - CRUD Operations', () => {
     // --------------------
     describe('GET /api/tasks/count', () => {
         it('devrait retourner le nombre correct de tâches', async() => {
-            // Réinitialiser / créer 2 tâches pour test
+            // Réinitialiser les tâches
+            tasks.length = 0;
             await request(app).post('/api/tasks').send({ title: 'T1' });
             await request(app).post('/api/tasks').send({ title: 'T2' });
 

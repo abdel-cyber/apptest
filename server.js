@@ -4,7 +4,9 @@ const bodyParser = require('body-parser');
 const app = express();
 app.use(bodyParser.json());
 
-// 💾 Stockage en mémoire (simple tableau)
+// --------------------
+// Stockage en mémoire
+// --------------------
 let tasks = [];
 let nextId = 1;
 
