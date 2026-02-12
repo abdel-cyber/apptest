@@ -15,6 +15,25 @@ function addTask({ title, completed = false }) {
     return newTask;
 }
 
+// Alias pour createTask (utilisé dans server.js)
+function createTask(taskData) {
+    return addTask(taskData);
+}
+
+// Récupérer une tâche par ID
+function getTaskById(id) {
+    return tasks.find(t => t.id === id) || null;
+}
+
+// Mettre à jour une tâche
+function updateTask(id, updates) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return null;
+    if (updates.title !== undefined) task.title = updates.title;
+    if (updates.completed !== undefined) task.completed = updates.completed;
+    return task;
+}
+
 // Supprimer une tâche par ID
 function deleteTask(id) {
     const index = tasks.findIndex(t => t.id === id);
@@ -33,11 +52,20 @@ function getTaskCount() {
     return tasks.length;
 }
 
+// Alias pour getTasksCount (utilisé dans server.js)
+function getTasksCount() {
+    return getTaskCount();
+}
+
 // Exporter toutes les fonctions
 module.exports = {
     getAllTasks,
     addTask,
+    createTask,
+    getTaskById,
+    updateTask,
     deleteTask,
     resetTasks,
-    getTaskCount // Nouvelle fonction exportée
+    getTaskCount,
+    getTasksCount
 };

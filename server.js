@@ -14,17 +14,17 @@ app.get('/api/tasks', (req, res) => {
     res.json(tasksModule.getAllTasks());
 });
 
+// GET /api/tasks/count - nombre de tâches (DOIT être avant /:id)
+app.get('/api/tasks/count', (req, res) => {
+    res.json({ count: tasksModule.getTasksCount() });
+});
+
 // GET /api/tasks/:id - tâche spécifique
 app.get('/api/tasks/:id', (req, res) => {
     const id = parseInt(req.params.id);
     const task = tasksModule.getTaskById(id);
     if (!task) return res.status(404).json({ error: 'Tâche non trouvée' });
     res.json(task);
-});
-
-// GET /api/tasks/count - nombre de tâches
-app.get('/api/tasks/count', (req, res) => {
-    res.json({ count: tasksModule.getTasksCount() });
 });
 
 // POST /api/tasks - créer une tâche
