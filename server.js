@@ -1,74 +1,83 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
-
-const taskService = require('./tasks');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
 app.use(bodyParser.json());
-app.use(express.static('public'));
 
-/* ======================
-   ROUTES API
-====================== */
+// 💾 Stockage en mémoire (simple tableau)
+let tasks = [];
+let nextId = 1;
 
-// GET ALL
+// --------------------
+// GET /api/tasks
+// --------------------
 app.get('/api/tasks', (req, res) => {
-    res.json(taskService.getAllTasks());
+    res.json(tasks);
 });
 
-// GET ONE
+// --------------------
+// GET /api/tasks/:id
+// --------------------
 app.get('/api/tasks/:id', (req, res) => {
-    const task = taskService.getTaskById(parseInt(req.params.id));
-
+    const id = parseInt(req.params.id);
+    const task = tasks.find(t => t.id === id);
     if (!task) return res.status(404).json({ error: 'Tâche non trouvée' });
+    res.json(task);
+});
+
+// --------------------
+// GET /api/tasks/count
+// --------------------
+app.get('/api/tasks/count', (req, res) => {
+    res.json({ count: tasks.length });
+});
+
+// --------------------
+// POST /api/tasks
+// --------------------
+app.post('/api/tasks', (req, res) => {
+    const { title, completed = false } = req.body;
+    if (!title) return res.status(400).json({ error: 'Le titre est requis' });
+
+    const newTask = { id: nextId++, title, completed };
+    tasks.push(newTask);
+    res.status(201).json(newTask);
+});
+
+// --------------------
+// PUT /api/tasks/:id
+// --------------------
+app.put('/api/tasks/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const task = tasks.find(t => t.id === id);
+    if (!task) return res.status(404).json({ error: 'Tâche non trouvée' });
+
+    const { title, completed } = req.body;
+    if (title !== undefined) task.title = title;
+    if (completed !== undefined) task.completed = completed;
 
     res.json(task);
 });
 
-// POST
-app.post('/api/tasks', (req, res) => {
-    try {
-        const task = taskService.addTask(req.body.title, req.body.completed);
-        res.status(201).json(task);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// PUT
-app.put('/api/tasks/:id', (req, res) => {
-    try {
-        const task = taskService.updateTask(parseInt(req.params.id), req.body);
-        res.json(task);
-    } catch (err) {
-        res.status(404).json({ error: err.message });
-    }
-});
-
-// DELETE
+// --------------------
+// DELETE /api/tasks/:id
+// --------------------
 app.delete('/api/tasks/:id', (req, res) => {
-    try {
-        const task = taskService.deleteTask(parseInt(req.params.id));
-        res.json(task);
-    } catch (err) {
-        res.status(404).json({ error: err.message });
-    }
+    const id = parseInt(req.params.id);
+    const index = tasks.findIndex(t => t.id === id);
+    if (index === -1) return res.status(404).json({ error: 'Tâche non trouvée' });
+
+    const deletedTask = tasks.splice(index, 1)[0];
+    res.json(deletedTask);
 });
 
-// 🔥 NOUVELLE ROUTE compteur
-app.get('/api/tasks/count', (req, res) => {
-    res.json({ count: taskService.getTaskCount() });
-});
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
+// --------------------
+// Démarrage serveur
+// --------------------
+const PORT = 3000;
 const server = app.listen(PORT, () => {
     console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
 
-module.exports = { app, server };
+// ⚠️ Export pour Jest
+module.exports = { app, server, tasks };
