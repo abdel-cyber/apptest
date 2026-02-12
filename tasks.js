@@ -1,71 +1,43 @@
-let tasks = [
-    { id: 1, title: 'Apprendre Node.js', completed: false },
-    { id: 2, title: 'Créer une API REST', completed: false },
-    { id: 3, title: 'Tester avec Jest', completed: false }
-];
+// tasks.js
 
-let nextId = 4;
+let tasks = [];
+let nextId = 1;
 
-// GET ALL
+// Retourner toutes les tâches
 function getAllTasks() {
     return tasks;
 }
 
-// GET ONE
-function getTaskById(id) {
-    return tasks.find(t => t.id === id);
-}
-
-// ADD
-function addTask(title, completed = false) {
-    if (!title) throw new Error('Le titre est requis');
-
-    const newTask = {
-        id: nextId++,
-        title,
-        completed
-    };
-
+// Ajouter une nouvelle tâche
+function addTask({ title, completed = false }) {
+    const newTask = { id: nextId++, title, completed };
     tasks.push(newTask);
     return newTask;
 }
 
-// UPDATE
-function updateTask(id, data) {
-    const task = getTaskById(id);
-    if (!task) throw new Error('Tâche non trouvée');
-
-    if (data.title !== undefined) task.title = data.title;
-    if (data.completed !== undefined) task.completed = data.completed;
-
-    return task;
-}
-
-// DELETE
+// Supprimer une tâche par ID
 function deleteTask(id) {
     const index = tasks.findIndex(t => t.id === id);
-    if (index === -1) throw new Error('Tâche non trouvée');
-
+    if (index === -1) return null;
     return tasks.splice(index, 1)[0];
 }
 
-// RESET (tests)
+// Réinitialiser les tâches (utile pour les tests)
 function resetTasks() {
     tasks = [];
     nextId = 1;
 }
 
-// 🔥 NOUVELLE FEATURE
+// Nouvelle fonction : compter les tâches
 function getTaskCount() {
     return tasks.length;
 }
 
+// Exporter toutes les fonctions
 module.exports = {
     getAllTasks,
-    getTaskById,
     addTask,
-    updateTask,
     deleteTask,
     resetTasks,
-    getTaskCount
+    getTaskCount // Nouvelle fonction exportée
 };

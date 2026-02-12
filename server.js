@@ -1,80 +1,58 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const tasksModule = require('./tasks');
 
 const app = express();
 app.use(bodyParser.json());
 
 // --------------------
-// Stockage en mémoire
+// Routes API
 // --------------------
-let tasks = [];
-let nextId = 1;
 
-// --------------------
-// GET /api/tasks
-// --------------------
+// GET /api/tasks - toutes les tâches
 app.get('/api/tasks', (req, res) => {
-    res.json(tasks);
+    res.json(tasksModule.getAllTasks());
 });
 
-// --------------------
-// GET /api/tasks/:id
-// --------------------
+// GET /api/tasks/:id - tâche spécifique
 app.get('/api/tasks/:id', (req, res) => {
     const id = parseInt(req.params.id);
-    const task = tasks.find(t => t.id === id);
+    const task = tasksModule.getTaskById(id);
     if (!task) return res.status(404).json({ error: 'Tâche non trouvée' });
     res.json(task);
 });
 
-// --------------------
-// GET /api/tasks/count
-// --------------------
+// GET /api/tasks/count - nombre de tâches
 app.get('/api/tasks/count', (req, res) => {
-    res.json({ count: tasks.length });
+    res.json({ count: tasksModule.getTasksCount() });
 });
 
-// --------------------
-// POST /api/tasks
-// --------------------
+// POST /api/tasks - créer une tâche
 app.post('/api/tasks', (req, res) => {
-    const { title, completed = false } = req.body;
+    const { title, completed } = req.body;
     if (!title) return res.status(400).json({ error: 'Le titre est requis' });
-
-    const newTask = { id: nextId++, title, completed };
-    tasks.push(newTask);
+    const newTask = tasksModule.createTask({ title, completed });
     res.status(201).json(newTask);
 });
 
-// --------------------
-// PUT /api/tasks/:id
-// --------------------
+// PUT /api/tasks/:id - mettre à jour
 app.put('/api/tasks/:id', (req, res) => {
     const id = parseInt(req.params.id);
-    const task = tasks.find(t => t.id === id);
-    if (!task) return res.status(404).json({ error: 'Tâche non trouvée' });
-
-    const { title, completed } = req.body;
-    if (title !== undefined) task.title = title;
-    if (completed !== undefined) task.completed = completed;
-
-    res.json(task);
+    const updated = tasksModule.updateTask(id, req.body);
+    if (!updated) return res.status(404).json({ error: 'Tâche non trouvée' });
+    res.json(updated);
 });
 
-// --------------------
-// DELETE /api/tasks/:id
-// --------------------
+// DELETE /api/tasks/:id - supprimer
 app.delete('/api/tasks/:id', (req, res) => {
     const id = parseInt(req.params.id);
-    const index = tasks.findIndex(t => t.id === id);
-    if (index === -1) return res.status(404).json({ error: 'Tâche non trouvée' });
-
-    const deletedTask = tasks.splice(index, 1)[0];
-    res.json(deletedTask);
+    const deleted = tasksModule.deleteTask(id);
+    if (!deleted) return res.status(404).json({ error: 'Tâche non trouvée' });
+    res.json(deleted);
 });
 
 // --------------------
-// Démarrage serveur
+// Serveur
 // --------------------
 const PORT = 3000;
 const server = app.listen(PORT, () => {
@@ -82,4 +60,4 @@ const server = app.listen(PORT, () => {
 });
 
 // ⚠️ Export pour Jest
-module.exports = { app, server, tasks };
+module.exports = { app, server, tasksModule };
