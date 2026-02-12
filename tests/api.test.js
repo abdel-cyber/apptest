@@ -198,3 +198,17 @@ describe('API Tests - CRUD Operations', () => {
         });
     });
 });
+const request = require('supertest');
+const { app, server } = require('../server');
+
+afterAll(() => server.close());
+
+test('GET /api/tasks/count doit retourner le nombre correct', async() => {
+    await request(app).post('/api/tasks').send({ title: 'T1' });
+    await request(app).post('/api/tasks').send({ title: 'T2' });
+
+    const res = await request(app).get('/api/tasks/count');
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.count).toBe(2);
+});
