@@ -198,8 +198,7 @@ describe('API Tests - CRUD Operations', () => {
         });
     });
 });
-const request = require('supertest');
-const { app, server } = require('../server');
+
 
 afterAll(() => server.close());
 
