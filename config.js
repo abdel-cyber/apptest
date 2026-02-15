@@ -1,7 +1,7 @@
-// Fichier: config.js (BONNE PRATIQUE)
+// ⚠️ MAUVAISE PRATIQUE - SECRET EN CLAIR!
 const config = {
-    apiKey: process.env.API_KEY, // Variable d'environnement
-    databaseUrl: process.env.DATABASE_URL
+    apiKey: "sk-abc123def456789",  // SECRET EN CLAIR! 
+    databaseUrl: "mongodb://admin:password123@localhost/todos"
 };
 
 module.exports = config;
