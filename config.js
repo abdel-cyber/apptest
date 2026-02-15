@@ -1,7 +1,7 @@
-// ⚠️ MAUVAISE PRATIQUE - SECRET EN CLAIR!
+// ✅ BONNE PRATIQUE - Utilisation de variables d'environnement
 const config = {
-    apiKey: "sk-abc123def456789",  // SECRET EN CLAIR! 
-    databaseUrl: "mongodb://admin:password123@localhost/todos"
+    apiKey: process.env.API_KEY || 'your-api-key-here',
+    databaseUrl: process.env.DATABASE_URL || 'mongodb://localhost/todos'
 };
 
 module.exports = config;
